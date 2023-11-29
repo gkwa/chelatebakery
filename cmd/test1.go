@@ -1,11 +1,9 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
 	"fmt"
 	"os"
+	"text/template"
 
 	"github.com/spf13/cobra"
 )
@@ -28,25 +26,16 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(test1Cmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// test1Cmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// test1Cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Add other flags and configurations as needed
 }
 
-// FileWriter is a custom type that implements the io.Writer interface
-type FileWriter struct {
+// FileWriter2 is a custom type that implements the io.Writer interface
+type FileWriter2 struct {
 	FileName string
 }
 
-// Write implements the io.Writer interface for FileWriter
-func (fw FileWriter) Write(p []byte) (n int, err error) {
+// Write implements the io.Writer interface for FileWriter2
+func (fw FileWriter2) Write(p []byte) (n int, err error) {
 	// Open the file with the specified filename
 	file, err := os.OpenFile(fw.FileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -59,9 +48,33 @@ func (fw FileWriter) Write(p []byte) (n int, err error) {
 }
 
 func runTest1() {
-	// Create an instance of FileWriter with a specific filename
-	fileWriter := FileWriter{FileName: "output.txt"}
+	// Create an instance of FileWriter2 with a specific filename
+	fileWriter2 := FileWriter2{FileName: "output.txt"}
 
-	// Use Fprintf to format and write data to FileWriter
-	fmt.Fprintf(fileWriter, "This data will be written to the file.\n")
+	// Example data to be formatted
+	data := struct {
+		Message string
+		Count   int
+	}{
+		Message: "Hello, World!",
+		Count:   42,
+	}
+
+	// Define a template
+	outputTemplate := `Message: {{.Message}}
+Count: {{.Count}}
+`
+
+	// Create a new template and parse the template string
+	tmpl, err := template.New("output").Parse(outputTemplate)
+	if err != nil {
+		fmt.Println("Error parsing template:", err)
+		return
+	}
+
+	// Execute the template and write the output to FileWriter2
+	err = tmpl.Execute(fileWriter2, data)
+	if err != nil {
+		fmt.Println("Error executing template:", err)
+	}
 }
